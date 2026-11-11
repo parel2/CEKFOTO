@@ -33,19 +33,18 @@ export function dmsCoord(lat: number, lng: number): string {
   return `${dms(lat, 'N', 'S')} · ${dms(lng, 'E', 'W')}`;
 }
 
-function loadDimensions(url: string): Promise<string | null> {
+// Browsers such as Chrome cannot decode HEIC, but EXIF can still be read from the file.
+function loadDimensions(url: string): Promise<string> {
   return new Promise(res => {
     const im = new Image();
     im.onload = () => res(`${im.naturalWidth} × ${im.naturalHeight}`);
-    im.onerror = () => res(null);
+    im.onerror = () => res('');
     im.src = url;
   });
 }
 
-// Returns null when the image cannot be decoded at all.
-export async function analyzeImage(file: File, url: string): Promise<PhotoAnalysis | null> {
+export async function analyzeImage(file: File, url: string): Promise<PhotoAnalysis> {
   const dim = await loadDimensions(url);
-  if (dim === null) return null;
 
   let data: Record<string, any> | null = null;
   try {
