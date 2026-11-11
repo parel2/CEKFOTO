@@ -31,6 +31,7 @@ function scanStatus(f: number): string {
 export function ImagePanel({ stage, previewUrl, onFiles }: ImagePanelProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
   const reduced = useReducedMotion();
   const scanFraction = useElapsed(TIMING.SCAN_MS * (reduced ? TIMING.REDUCED_MOTION_FACTOR : 1), stage === 'scanning');
   const hasPhoto = previewUrl !== null;
@@ -66,12 +67,17 @@ export function ImagePanel({ stage, previewUrl, onFiles }: ImagePanelProps) {
       >
         {hasPhoto ? (
           <div className="scan-frame">
-            <img
-              key={previewUrl}
-              src={previewUrl}
-              alt="Foto yang dianalisis"
-              className={`scan-image ${stage === 'scanning' ? 'glitch-in' : ''}`}
-            />
+            {previewFailed ? (
+              <div className="preview-fallback">PREVIEW TIDAK DIDUKUNG BROWSER INI. METADATA TETAP DIBACA.</div>
+            ) : (
+              <img
+                key={previewUrl}
+                src={previewUrl}
+                alt="Foto yang dianalisis"
+                className={`scan-image ${stage === 'scanning' ? 'glitch-in' : ''}`}
+                onError={() => setPreviewFailed(true)}
+              />
+            )}
             {(stage === 'scanning' || stage === 'processing') && (
               <ScanOverlay stage={stage} fraction={scanFraction} />
             )}
